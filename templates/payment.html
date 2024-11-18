@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Оплата</title>
+</head>
+<body>
+
+<form action="{% url 'payment' %}" method="POST">
+  {% csrf_token %}
+  <script
+  src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+  data-key="{{STRIPE_PUBLISHABLE_KEY}}"
+  data-amount="100"
+  data-name="тестовый магазин"
+  data-description="первая покупка"
+  data-locale="auto">
+  
+</script>
+ <input type="hidden" name="stripeToken" id="stripeToken" />
+    <button type="submit">Оплатить</button>
+</form>
+
+</body>
+</html>

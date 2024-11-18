@@ -1,0 +1,62 @@
+{% extends 'main.html' %}
+{% load static %}
+ 
+{% block content %} 
+
+<div class="row">
+    {% for product in products %}
+    <div class="col-sm-3 my-4 card-deck">
+      <div class="card">
+        <br><br>
+        <img class="card-img-top" src="{{ product.imageURL }}" alt="Card image cap">
+        <div class="card-body">
+          <h6 class="card-title"><strong>{{ product.store }}</strong></h6>
+          <hr>
+          <p class="card-text">{{ product.name }}</p>
+        </div>
+        <div class="card-footer">
+            <h5><strong>£{{product.price|floatformat:2}}</strong></h5>
+          
+          {% if product.in_stock %}
+            {% if user.is_authenticated %}
+              {% if product.id in items %}
+                <button data-product="{{ product.id }}" data-action="remove" class="btn btn-outline-secondary btn-sm add-btn update-cart">-</button>
+                <p style="display: inline"><strong>{{ items|get_item:product.id }}</strong></p>
+                <button data-product="{{ product.id }}" data-action="add" class="btn btn-outline-secondary btn-sm add-btn update-cart">+</button>
+              {% else %}
+                <button data-product="{{ product.id }}" data-action="add" class="btn btn-success add-btn update-cart">Добавить в корзину</button>
+              {% endif %}
+              <br>
+              <a class="btn btn-primary mt-3" href="{% url 'product_detail' product.id %}">Подробнее о товаре</a>
+            {% else %}
+              <p>Чтобы добавить товар в корзину, пожалуйста, <a href="{% url 'login' %}">войдите</a> в свой аккаунт.</p>
+              <a class="btn btn-primary mt-3" href="{% url 'product_detail' product.id %}">Подробнее о товаре</a>
+            {% endif %}
+          {% else %}
+            <p>Товар временно отсутствует</p>
+            <a class="btn btn-primary mt-3" href="{% url 'product_detail' product.id %}">Подробнее о товаре</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    
+  </div>
+  <div class="pagination">
+    <span class="step-links">
+        {% if products.has_previous %}
+            <a class='btn btn-success' href="?page=1"> первая</a>
+            <a class='btn btn-success' href="?page={{ products.previous_page_number }}">предыдущая</a>
+        {% endif %}
+
+        <span class="current text-primary">
+            Страница {{ products.number }} из {{ products.paginator.num_pages }}
+        </span>
+
+        {% if products.has_next %}
+            <a class='btn btn-success' href="?page={{ products.next_page_number }}">следующая</a>
+            <a class='btn btn-success' href="?page={{ products.paginator.num_pages }}">последняя </a>
+        {% endif %}
+    </span>
+</div>
+  {% endblock %} 

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {
+  font-family: Arial;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+form.searchbar input[type=text] {
+  padding: 10px;
+  font-size: 17px;
+  border: 1px solid grey;
+  float: left;
+  width: 80%;
+  background: #f1f1f1;
+}
+
+form.searchbar button {
+  float: left;
+  width: 20%;
+  padding: 10px;
+  
+  color: white;
+  font-size: 17px;
+  border: 1px solid grey;
+  border-left: none;
+  cursor: pointer;
+}
+
+form.searchbar button:hover {
+  
+}
+
+form.searchbar::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+</style>
+</head>
+<body>
+
+
+<form class="searchbar" style="margin:auto;max-width:400px" method "get" action = "{% url 'contents' %}">
+  <input type="text" placeholder="Что хотите найти?" name="q">
+  <button type="submit" class='btn btn-success'>Искать</button>
+</form>
+
+</body>
+</html> 

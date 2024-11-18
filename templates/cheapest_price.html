@@ -1,0 +1,243 @@
+{% extends 'main.html' %}
+{% load static %}
+{% load custom_filters %}
+{% block content %}
+<head>
+	 
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .btn-outline-dark {
+            color: #212529;
+            background-color: #fff;
+            border-color: #ABCCD8;
+        }
+
+        .btn-outline-dark:hover {
+            color: #212529;
+            background-color: #66A1B8;
+            border-color: #66A1B8;
+        }
+    </style>
+</head>
+<br>
+<button type="button" class="btn btn-primary" id="openPaymentModal">
+    Оплатить
+</button>
+
+<!-- Модальное окно для выбора магазина и оплаты -->
+<div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="paymentModalLabel">Оплата</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Форма для выбора магазина и оплаты -->
+                <form id="payment-form" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="total_price" value="{{ total_price }}">
+                    <div class="form-group">
+                        <label for="store">Выберите магазин:</label>
+                        <select name="store" id="store" class="form-control">
+                            <option value="tesco">Tesco</option>
+                            <option value="morrisons">Morrisons</option>
+                            <option value="waitrose">Waitrose</option>
+                            <option value="sainsburys">Sainsburys</option>
+                        </select>
+                    </div>
+                    <div id="dropin-container"></div> <!-- Контейнер для формы оплаты -->
+                    <input type="hidden" name="payment_method_nonce">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="closePaymentModal">Закрыть</button>
+                <button type="submit" form="payment-form" class="btn btn-primary" id="submitPayment">Оплатить</button> <!-- Кнопка оплаты -->
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<a class="btn btn-success" href="{% url 'contents' %}">Вернуться к покупкам</a>
+
+<div class="row">
+    <div class="col-lg-6 card-group">
+        <div class="box-element" id="form-wrapper">
+            <h1>Tesco</h1>
+            <div class="cart-row">
+                <div style="flex:2"></div>
+                <div style="flex:2"><strong>Товар</strong></div>
+                <div style="flex:1"><strong>Цена</strong></div>
+                <div style="flex:1"><strong>Количество</strong></div>
+                <div style="flex:1"><strong>Итого</strong></div>
+            </div>
+            {% for item in items %}
+            {% if item.product.tesco_match == -1 %}
+            <div class="cart-row">
+                <div style="flex:2"><img class="row-image" src="{{ item.product.imageURL }}"></div>
+                <div style="flex:2"><p>{{ item.product.name }}</p></div>
+                <div style="flex:1"><p>£{{ item.product.price|floatformat:2 }}</p></div>
+                <div style="flex:1"><p class="quantity">&nbsp&nbsp;{{ item.quantity }}</p></div>
+                <div style="flex:1"><p>£{{ item.get_total }}</p></div>
+            </div>
+            {% else %}
+            <div class="cart-row">
+                <div style="flex:2"><img class="row-image" src="{{ item.product.tesco_match_id.imageURL }}"></div>
+                <div style="flex:2"><p>{{ item.product.tesco_match_id.name }}</p></div>
+                <div style="flex:1"><p>£{{ item.product.tesco_match_id.price|floatformat:2 }}</p></div>
+                <div style="flex:1"><p class="quantity">&nbsp&nbsp;{{ item.quantity }}</p></div>
+                <div style="flex:1"><p>£{{ item.get_total_tesco }}</p></div>
+            </div>
+            {% endif %}
+            {% endfor %}
+            <h4>К оплате: £{{ order.get_total_price_tesco }}</h4>
+        </div>
+    </div>
+
+    <div class="col-lg-6 card-group">
+        <div class="box-element" id="form-wrapper">
+            <h1>Morrisons</h1>
+            <div class="cart-row">
+                <div style="flex:2"></div>
+                <div style="flex:2"><strong>Товар</strong></div>
+                <div style="flex:1"><strong>Цена</strong></div>
+                <div style="flex:1"><strong>Количество</strong></div>
+                <div style="flex:1"><strong>Итого</strong></div>
+            </div>
+            {% for item in items %}
+            {% if item.product.morrisons_match == -1 %}
+            <div class="cart-row">
+                <div style="flex:2"><img class="row-image" src="{{ item.product.imageURL }}"></div>
+                <div style="flex:2"><p>{{ item.product.name }}</p></div>
+                <div style="flex:1"><p>£{{ item.product.price|floatformat:2 }}</p></div>
+                <div style="flex:1"><p class="quantity">&nbsp&nbsp;{{ item.quantity }}</p></div>
+                <div style="flex:1"><p>£{{ item.get_total }}</p></div>
+            </div>
+            {% else %}
+            <div class="cart-row">
+                <div style="flex:2"><img class="row-image" src="{{ item.product.morrisons_match_id.imageURL }}"></div>
+                <div style="flex:2"><p>{{ item.product.morrisons_match_id.name }}</p></div>
+                <div style="flex:1"><p>£{{ item.product.morrisons_match_id.price|floatformat:2 }}</p></div>
+                <div style="flex:1"><p class="quantity">&nbsp&nbsp;{{ item.quantity }}</p></div>
+                <div style="flex:1"><p>£{{ item.get_total_morrisons }}</p></div>
+            </div>
+            {% endif %}
+            {% endfor %}
+            <h4>К оплате: £{{ order.get_total_price_morrisons }}</h4>
+        </div>
+    </div>
+
+    <div class="col-lg-6 card-group">
+        <div class="box-element" id="form-wrapper">
+            <h1>Waitrose</h1>
+            <div class="cart-row">
+                <div style="flex:2"></div>
+                <div style="flex:2"><strong>Товар</strong></div>
+                <div style="flex:1"><strong>Цена</strong></div>
+                <div style="flex:1"><strong>Количество</strong></div>
+                <div style="flex:1"><strong>Итого</strong></div>
+            </div>
+            {% for item in items %}
+            {% if item.product.waitrose_match == -1 %}
+            <div class="cart-row">
+                <div style="flex:2"><img class="row-image" src="{{ item.product.imageURL }}"></div>
+                <div style="flex:2"><p>{{ item.product.name }}</p></div>
+                <div style="flex:1"><p>£{{ item.product.price|floatformat:2 }}</p></div>
+                <div style="flex:1"><p class="quantity">&nbsp&nbsp;{{ item.quantity }}</p></div>
+                <div style="flex:1"><p>£{{ item.get_total }}</p></div>
+            </div>
+            {% else %}
+            <div class="cart-row">
+                <div style="flex:2"><img class="row-image" src="{{ item.product.waitrose_match_id.imageURL }}"></div>
+                <div style="flex:2"><p>{{ item.product.waitrose_match_id.name }}</p></div>
+                <div style="flex:1"><p>£{{ item.product.waitrose_match_id.price|floatformat:2 }}</p></div>
+                <div style="flex:1"><p class="quantity">&nbsp&nbsp;{{ item.quantity }}</p></div>
+                <div style="flex:1"><p>£{{ item.get_total_waitrose }}</p></div>
+            </div>
+            {% endif %}
+            {% endfor %}
+            <h4>К оплате: £{{ order.get_total_price_waitrose }}</h4>
+        </div>
+    </div>
+
+    <div class="col-lg-6 card-group">
+        <div class="box-element" id="form-wrapper">
+            <h1>Sainsburys</h1>
+            <div class="cart-row">
+                <div style="flex:2"></div>
+                <div style="flex:2"><strong>Товар</strong></div>
+                <div style="flex:1"><strong>Цена</strong></div>
+                <div style="flex:1"><strong>Количество</strong></div>
+                <div style="flex:1"><strong>Итого</strong></div>
+            </div>
+            {% for item in items %}
+            {% if item.product.sainsburys_match == -1 %}
+            <div class="cart-row">
+                <div style="flex:2"><img class="row-image" src="{{ item.product.imageURL }}"></div>
+                <div style="flex:2"><p>{{ item.product.name }}</p></div>
+                <div style="flex:1"><p>£{{ item.product.price|floatformat:2 }}</p></div>
+                <div style="flex:1"><p class="quantity">&nbsp&nbsp;{{ item.quantity }}</p></div>
+                <div style="flex:1"><p>£{{ item.get_total }}</p></div>
+            </div>
+            {% else %}
+            <div class="cart-row">
+                <div style="flex:2"><img class="row-image" src="{{ item.product.sainsburys_match_id.imageURL }}"></div>
+                <div style="flex:2"><p>{{ item.product.sainsburys_match_id.name }}</p></div>
+                <div style="flex:1"><p>£{{ item.product.sainsburys_match_id.price|floatformat:2 }}</p></div>
+                <div style="flex:1"><p class="quantity">&nbsp&nbsp;{{ item.quantity }}</p></div>
+                <div style="flex:1"><p>£{{ item.get_total_sainsburys }}</p></div>
+            </div>
+            {% endif %}
+            {% endfor %}
+            <h4>К оплате: £{{ order.get_total_price_sainsburys }}</h4>
+        </div>
+    </div>
+</div>
+
+<script src="https://js.braintreegateway.com/web/dropin/1.31.1/js/dropin.min.js"></script>
+ 
+<script>
+	var client_token = "{{ client_token }}";
+    var dropinInstance; // Переменная для хранения экземпляра Drop-in UI
+
+    // Обработчик клика по кнопке для открытия модального окна
+    $('#openPaymentModal').on('click', function () {
+        // Создание формы Drop-in UI при открытии модального окна
+        braintree.dropin.create({
+            authorization: client_token,
+            container: '#dropin-container'
+        }, function (createErr, instance) {
+            if (createErr) {
+                console.error('Ошибка создания формы Drop-in UI', createErr);
+                return;
+            }
+            dropinInstance = instance; // Сохраняем экземпляр Drop-in UI для последующего использования
+            $('#paymentModal').modal('show'); // Отображаем модальное окно после создания формы Drop-in UI
+        });
+    });
+
+    // Обработчик клика по кнопке для закрытия модального окна
+    $('#closePaymentModal').on('click', function () {
+        $('#paymentModal').modal('hide'); // Скрываем модальное окно
+    });
+
+    // Обработчик клика по кнопке для отправки оплаты
+    $('#submitPayment').on('click', function () {
+        // Выполняем запрос платежного метода при нажатии кнопки "Оплатить"
+        dropinInstance.requestPaymentMethod(function (err, payload) {
+            if (err) {
+                console.error('Ошибка получения платежного метода', err);
+                return;
+            }
+            // Помещаем полученный платежный метод в скрытое поле формы
+            document.querySelector('input[name="payment_method_nonce"]').value = payload.nonce;
+            $('#payment-form').submit(); // Отправляем форму оплаты
+        });
+    });
+</script>
+
+{% endblock content %}

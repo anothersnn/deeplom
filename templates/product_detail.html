@@ -1,0 +1,257 @@
+{% extends 'main.html' %}
+{% load static %}
+{% block content %}
+
+
+    <title>{{ product.name }}</title>
+</head>
+<body>
+    
+ 
+     
+      
+  <div class="product-container">
+    <h1>{{ product.name }}</h1>
+    <img src="{{ product.imageURL }}" alt="{{ product.name }}" class="product-image">
+    <div class="product-details">
+      <p class="product-price">Цена: £{{ product.price|floatformat:2 }}.</p>
+      <p class="product-store">Магазин: {{ product.store }}</p>
+      <p class="product-category">Категория: {{ product.category }}</p>
+      {% if product.in_stock %}
+        <p class="product-availability" style="color: green;">Товар в наличии</p>
+      {% else %}
+        <p class="product-availability" style="color: red;">Товар отсутствует</p>
+      {% endif %}
+      {% if product.volume_or_weight %}
+        <p class="product-weight">Вес/Объем: {{ product.volume_or_weight }}</p>
+      {% endif %}
+      {% if product.description %}
+        <button class='btn btn-primary' onclick="toggleDescription()">Показать/скрыть описание</button>
+        <p class="product-description" id="product-description" style="display: none;">{{ product.description }}</p>
+      {% endif %}
+    </div>
+  </div>
+  
+
+      <script>
+        function showAlert(event) {
+          event.preventDefault();
+        
+          setTimeout(() => {
+            document.querySelector('form').submit();
+          }, 1000);  
+    
+          const alert = document.getElementById('success-alert');
+          alert.style.display = 'block';
+          setTimeout(() => {
+            alert.style.display = 'none';
+          }, 3000);  
+        }
+      </script>
+     
+      
+    <style>
+        .product-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+          }
+          .product-container h1 {
+            text-align: center;
+            margin-bottom: 20px;
+          }
+          .product-image {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 0 auto 20px;
+            border-radius: 8px;
+          }
+          .product-details {
+            text-align: center;
+          }
+          .product-details p {
+            font-size: 18px;
+            margin: 10px 0;
+          }
+          .product-price {
+            font-size: 22px;
+            font-weight: bold;
+            color: #28a745;
+          }
+          .product-category, .product-store {
+            font-style: italic;
+            color: #6c757d;
+          }
+        .review-form {
+          max-width: 600px;
+          margin: 0 auto;
+          padding: 20px;
+          background-color: #f8f9fa;
+          border-radius: 8px;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .review-form h3 {
+          text-align: center;
+          margin-bottom: 20px;
+        }
+        .review-form textarea {
+          width: 100%;
+          height: 100px;
+          padding: 10px;
+          border-radius: 5px;
+          border: 1px solid #ced4da;
+          margin-bottom: 20px;
+        }
+        .star-rating {
+          display: flex;
+          justify-content: center;
+          flex-direction: row-reverse;
+          margin-bottom: 20px;
+        }
+        .star-rating input {
+          display: none;
+        }
+        .star-rating label {
+          font-size: 2em;
+          color: #ddd;
+          cursor: pointer;
+        }
+        .star-rating input:checked ~ label,
+        .star-rating input:hover ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+          color: #ffc107;
+        }
+        .review-form button {
+          display: block;
+          width: 100%;
+          padding: 10px;
+          border: none;
+          background-color: #007bff;
+          color: white;
+          font-size: 16px;
+          border-radius: 5px;
+          cursor: pointer;
+        }
+        .review-form button:hover {
+          background-color: #0056b3;
+        }
+        .alert {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+          }
+      </style>
+    </head>
+    <body>
+      <div class="review-form">
+        <h3>Добавить отзыв</h3>
+        {% if user.is_authenticated %}
+          <form method="post">
+            {% csrf_token %}
+            <textarea name="text" placeholder="Ваш отзыв" required></textarea><br>
+            <div class="star-rating">
+              <input type="radio" id="5-stars" name="rating" value="5" />
+            <label for="5-stars" class="star">&#9733;</label>
+            <input type="radio" id="4-stars" name="rating" value="4" />
+            <label for="4-stars" class="star">&#9733;</label>
+            <input type="radio" id="3-stars" name="rating" value="3" />
+            <label for="3-stars" class="star">&#9733;</label>
+            <input type="radio" id="2-stars" name="rating" value="2" />
+            <label for="2-stars" class="star">&#9733;</label>
+            <input type="radio" id="1-star" name="rating" value="1" required />
+            <label for="1-star" class="star">&#9733;</label>
+                
+               
+             
+              
+              <div class="alert" id="success-alert">
+                Отзыв успешно добавлен!
+              </div>
+              {% comment %} <input type="radio" id="5-stars" name="rating" value="5" />
+              <label for="5-star" class="star">&#9733;</label> {% endcomment %}
+            </div>
+            <button type="submit">Отправить</button>
+          </form>
+        
+          
+        {% else %}
+          <p>Вам нужно <a href="{% url 'login' %}">войти</a>, чтобы оставить отзыв.</p>
+        {% endif %}
+      </div>
+    <section style="color: #000; background-color: #f3f2f2;">
+        <div class="container py-5">
+          <div class="row d-flex justify-content-center">
+            <div class="col-md-10 col-xl-8 text-center">
+              <h3 class="fw-bold mb-4">Отзывы о товаре</h3>
+              <p class="mb-4 pb-2 mb-md-5 pb-md-0"></p>
+            </div>
+          </div>
+           
+          {% for review in reviews %}
+            {% if forloop.counter0|divisibleby:3 %}
+              <div class="row text-center">
+            {% endif %}
+      
+            <div class="col-md-4 mb-4 mb-md-0">
+              <div class="card">
+                <div class="card-body py-4 mt-2">
+                  <div class="d-flex justify-content-center mb-4">
+                    <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(10).webp" class="rounded-circle shadow-1-strong" width="100" height="100" />
+                  </div>
+                  <h5 class="font-weight-bold">{{ review.user.username }}  {{ review.date_added }}</h5>
+                  <p>Отзыв: {{ review.sentiment }}</p>
+                  <ul class="list-unstyled d-flex justify-content-center">
+                   
+                    <div class="item-rating">
+                      {% for _ in "x"|ljust:review.rating %}
+                        <svg width="26" height="24" viewBox="0 0 26 24" fill="#FFB800" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12.0489 0.927052C12.3483 0.00574112 13.6517 0.00573993 13.9511 0.927051L16.1432 7.67376C16.2771 8.08578 16.661 8.36475 17.0943 8.36475H24.1882C25.1569 8.36475 25.5597 9.60436 24.7759 10.1738L19.0369 14.3435C18.6864 14.5981 18.5397 15.0495 18.6736 15.4615L20.8657 22.2082C21.1651 23.1295 20.1106 23.8956 19.3269 23.3262L13.5878 19.1565C13.2373 18.9019 12.7627 18.9019 12.4122 19.1565L6.67312 23.3262C5.88941 23.8956 4.83493 23.1295 5.13428 22.2082L7.32642 15.4615C7.46029 15.0495 7.31363 14.5981 6.96315 14.3435L1.22405 10.1738C0.440337 9.60436 0.843112 8.36475 1.81184 8.36475H8.90575C9.33897 8.36475 9.72293 8.08578 9.8568 7.67376L12.0489 0.927052Z" fill="#FFB800" />
+                        </svg>
+                      {% endfor %}
+                    </div>
+                  </ul>
+                  <p class="mb-2">
+                    <i class="fas fa-quote-left pe-2"></i> {{ review.text }}
+                  </p>
+                  
+                </div>
+              </div>
+            </div>
+       
+    
+            {% if forloop.counter|divisibleby:3 or forloop.last %}
+              </div>
+            {% endif %}
+            <br>
+          {% endfor %}
+        </div>
+      </section>
+     
+    
+      
+</body>
+</html>
+<script>
+ 
+    function toggleDescription() {
+      var description = document.getElementById("product-description");
+      if (description.style.display === "none") {
+        description.style.display = "block";
+      } else {
+        description.style.display = "none";
+      }
+    }
+ 
+</script>
+                {% endblock content %}

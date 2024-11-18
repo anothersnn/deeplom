@@ -1,0 +1,144 @@
+{% extends 'main.html' %}
+{% load static %}
+{% load custom_filters %}
+{% block content %}
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .btn-outline-dark {
+            color: #212529;
+            background-color: #fff;
+            border-color: #ABCCD8;
+        }
+
+        .btn-outline-dark:hover {
+            color: #212529;
+            background-color: #66A1B8;
+            border-color: #66A1B8;
+        }
+
+        .col-lg-2 {
+            right: 0;
+            position: fixed;
+        }
+
+        .col-lg-12 {
+            top: 70px;
+        }
+    </style>
+</head>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="box-element" id="form-wrapper">
+            <a class="btn btn-success" href="{% url 'cheapest_price' %}">Найти наиболее выгодную цену</a>
+        
+ 
+                
+ 
+        </div>
+    </div>
+    
+
+    
+    <div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="paymentModalLabel">Оплата через Braintree</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Форма оплаты -->
+                    <form id="payment-form" method="POST" class="text-right">
+                        {% csrf_token %}
+                        <input type="hidden" name="total_price" value="{{ total_price }}">
+                        <div id="dropin-container"></div>
+                        <button type="submit" class="btn btn-outline-dark">Оплатить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>    
+    {% if items %}
+     
+    {% endif %}
+
+    <div class="col-lg-12">
+        <div class="box-element">
+            <a class="btn btn-success" href="{% url 'contents' %}">Вернуться к покупкам</a>
+            
+            <div class="cart-row">
+                <div style="flex:2"></div>
+                <div style="flex:2"><strong>Товар</strong></div>
+                <div style="flex:1"><strong>Цена</strong></div>
+                <div style="flex:1"><strong>Количество</strong></div>
+                <div style="flex:1"><strong>Итоговая стоимость</strong></div>
+            </div>
+            {% if items %}
+                {% for item in items %}
+                <div class="cart-row">
+                    <div style="flex:2"><img class="row-image" src="{{ item.product.imageURL }}"></div>
+                    <div style="flex:2"><p>{{ item.product.name }}</p></div>
+                    <div style="flex:1"><p>£{{ item.product.price|floatformat:2 }}</p></div>
+                    <div style="flex:1">
+                        <div class="inline-block">
+                            <img data-product="{{ item.product.id }}" data-action="remove" class="chg-quantity update-cart" src="{% static 'images/remove.png' %}">
+                        </div>
+                        <p class="quantity">&nbsp&nbsp;{{ item.quantity }}</p>
+                        <div class="inline-block">
+                            <img data-product="{{ item.product.id }}" data-action="add" class="chg-quantity update-cart" src="{% static 'images/add.png' %}">
+                        </div>
+                    </div>
+                    <div style="flex:1"><p>£{{ item.get_total }}</p></div>
+                    
+                     
+                    
+                </div>
+                {% endfor %}
+                <div style="flex:1">Итого<p>£{{ total_price}}</p></div>
+                <button type="button" class="btn btn-primary mt-5" data-toggle="modal" data-target="#paymentModal">Оплатить</button>
+            {% else %}
+                <div class="cart-row">
+                    <p>Ваша корзина пуста. Начните покупки!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script src="https://js.braintreegateway.com/web/dropin/1.31.0/js/dropin.min.js"></script>
+<script>
+    var form = document.querySelector('#payment-form');
+    var client_token = "{{ client_token }}";
+
+    // Создаем форму оплаты через Braintree
+    braintree.dropin.create({
+        authorization: client_token,
+        container: '#dropin-container'
+    }, function (createErr, instance) {
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            instance.requestPaymentMethod(function (err, payload) {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+
+                // Добавляем nonce в скрытое поле формы
+                var nonceInput = document.createElement('input');
+                nonceInput.type = 'hidden';
+                nonceInput.name = 'payment_method_nonce';
+                nonceInput.value = payload.nonce;
+                form.appendChild(nonceInput);
+
+                // Отправляем форму на сервер для обработки оплаты
+                form.submit();
+            });
+        });
+    });
+</script>
+{% endblock content %}

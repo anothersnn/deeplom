@@ -1,0 +1,256 @@
+{% extends 'main.html' %}
+{% load static %}
+{% block content %}
+
+{#Navigation bar#}
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+    body {
+      font-family: "Lato", sans-serif;
+    }
+    
+    @media screen and (max-height: 450px) {
+      .sidenav {padding-top: 15px;}
+      .sidenav a {font-size: 18px;}
+      
+    }
+
+    .card{
+      font-size:13px;
+    }
+
+    .btn-outline-secondary {
+      color: #212529;
+      background-color: #fff;
+      border-color: #ABCCD8;
+  }
+
+  .btn-outline-secondary:hover {
+    color: #212529;
+    background-color: #66A1B8;
+    border-color: #66A1B8;
+}
+
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+#checkbox, .btn span { /* Hide the checkbox input & word "Menu" in the button */
+    display: none;
+}
+
+/* Menu button - starts */
+.openbtn {
+  left: 0;
+  top: 55px;
+  position: fixed;
+  display: block;
+  background-color: black;
+  color: blue;
+  width: 55px;
+  height: 50px;
+  line-height: 50px;
+  padding: 0 20px;
+  cursor: pointer;
+  transition: width .3s ease-in-out;
+}
+/* Menu button - ends */
+
+/* Sidebar - starts */
+.sidebar {
+  top: 105px;
+  background-color: #111;
+  position: fixed;
+  width: 250px;
+  height: 100%;
+  z-index: 1111;
+  left: 0;
+  transition: transform .3s ease-in-out;
+  transform: translateX(-250px);
+}
+
+.sidebar ul {
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+}
+
+.sidebar ul a {
+  position: relative;
+  text-decoration: none;
+  display: block;
+  background-color: transparent;
+  color: #BAB5BD;
+  padding: 15px 20px;
+  font-size: 16px;
+}
+
+.sidebar ul a li i {
+  margin-right: 15px;
+}
+
+.sidebar ul a:hover, .sidebar ul a.active {
+  background-color: #161920;
+  color: #fff;
+}
+
+.sidebar ul a:hover::before, .sidebar ul a.active::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  content: "";
+  background-color: #247D9E;
+  width: 4px;
+  height: 100%;
+}
+/* Sidebar - ends */
+
+/* Effect of showing the sidebar - starts */
+#checkbox:checked ~ .sidebar {
+  transform: translateX(0);
+}
+
+#checkbox:checked + .openbtn {
+  width: 250px;
+  padding: 0 20px;
+}
+
+#checkbox:checked + .openbtn span { /* Show again the word "Menu" in the button */
+  display: inline;
+}
+
+
+
+
+    </style>
+    </head>
+    <body>
+
+      <input type="checkbox" id="checkbox">
+      <label class="openbtn" for="checkbox" ><span>☰ Фильтр</span></label>
+
+    <div class="sidebar">
+      <form method "get" action = "{% url 'contents' %}">
+      <div class = "control">
+      
+      {#Search box #}
+      <h2 class='text-primary'>Товар</h2>
+      <textarea rows="5" cols="27" type="text" placeholder="Введите товар или описание" name="q"></textarea>
+
+      {# Stores #}
+      <br><br><h2 class='text-primary'>Магазины</h2>
+      <input type="checkbox" name="Tesco" {%if Tesco %}checked="checked"{% endif %}>
+      <label class='text-success' for="Tesco">Tesco</label><br>
+
+      <input type="checkbox" name="Waitrose" {%if Waitrose %}checked="checked"{% endif %}>
+      <label class='text-success' for="Waitrose">Waitrose</label><br></div>
+      
+      <input type="checkbox" name="Morrisons" {%if Morrisons %}checked="checked"{% endif %}>
+      <label class='text-success' for="Waitrose">Morrisons</label><br>
+
+      <input type="checkbox" name="Sainsburys" {%if Sainsburys %}checked="checked"{% endif %}>
+      <label class='text-success' for="Sainsburys">Sainsbury's</label>
+
+      {# Price #}
+
+      <br><br><h2 class='text-primary'>Стоимость</h2>
+
+      <input type="text" placeholder = "Минимальная цена" name="min_price" size = "15" maxlength = "5">
+      <label for="lname">-</label>
+      <input class='' type="text" placeholder = "Максимальная цена" name="max_price" size = "15" maxlength = "5"><br><br>
+      <button class='btn btn-primary' type="submit">Подтвердить</button></form>
+    </div>
+       
+    
+    
+    <script>
+    function openNav() {
+      document.getElementById("mySidebar").style.width = "250px";
+      document.getElementById("main").style.visibility = "hidden";
+    }
+    
+    function closeNav() {
+      document.getElementById("mySidebar").style.width = "0";
+      document.getElementById("main").style.visibility= "visible";
+    }
+    </script>
+
+
+    </body>
+
+    {% include 'searchbar.html' %}
+    <br><br>
+    {#Dynamic data output#}
+    <div class="row">
+      {% for product in products %}
+      <div class="col-sm-3 my-4 card-deck">
+        <div class="card">
+          <br><br>
+          <img class="card-img-top" src="{{ product.imageURL }}" alt="Card image cap">
+          <div class="card-body">
+            <h6 class="card-title"><strong>{{ product.store }}</strong></h6>
+            <hr>
+            <p class="card-text">{{ product.name }}</p>
+           
+            {% if product.description%}
+            <hr>
+            <p class="card-text"> <h5>Описание</h5>{{ product.description|truncatechars:100 }}</p>
+            {%endif%}
+          </div>
+          <div class="card-footer">
+            <h5><strong>£{{product.price|floatformat:2}}</strong></h5>
+           
+            {% if product.in_stock %}
+              {% if user.is_authenticated %}
+                {% if product.id in items %}
+                  <button data-product="{{ product.id }}" data-action="remove" class="btn btn-outline-secondary btn-sm add-btn update-cart">-</button>
+                  <p style="display: inline"><strong>{{ items|get_item:product.id }}</strong></p>
+                  <button data-product="{{ product.id }}" data-action="add" class="btn btn-outline-secondary btn-sm add-btn update-cart">+</button>
+                {% else %}
+                  <button data-product="{{ product.id }}" data-action="add" class="btn btn-success add-btn update-cart">Добавить в корзину</button>
+                {% endif %}
+                <br>
+                <a class="btn btn-primary mt-3" href="{% url 'product_detail' product.id %}">Подробнее о товаре</a>
+              {% else %}
+                <p>Чтобы добавить товар в корзину, пожалуйста, <a href="{% url 'login' %}">войдите</a> в свой аккаунт.</p>
+                <a class="btn btn-primary mt-3" href="{% url 'product_detail' product.id %}">Подробнее о товаре</a>
+              {% endif %}
+            {% else %}
+              <p>Товар временно отсутствует</p>
+              <a class="btn btn-primary mt-3" href="{% url 'product_detail' product.id %}">Подробнее о товаре</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    
+    
+    
+    
+      
+      
+    {% comment %} <div class="pagination">
+      <span class="step-links">
+          {% if products.has_previous %}
+              <a class='btn btn-success' href="?page=1"> первая</a>
+              <a class='btn btn-success' href="?page={{ products.previous_page_number }}">предыдущая</a>
+          {% endif %}
+  
+          <span class="current text-primary">
+              Страница {{ products.number }} из {{ products.paginator.num_pages }}
+          </span>
+  
+          {% if products.has_next %}
+              <a class='btn btn-success' href="?page={{ products.next_page_number }}">следующая</a>
+              <a class='btn btn-success' href="?page={{ products.paginator.num_pages }}">последняя </a>
+          {% endif %}
+      </span>
+  </div> {% endcomment %}
+</div>
+
+{% endblock content %}
